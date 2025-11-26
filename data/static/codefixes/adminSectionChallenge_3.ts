@@ -1,9 +1,76 @@
-const routes: Routes = [
+import { Routes } from '@angular/router'
+import { AdminGuard } from './guards/admin.guard'
+import { AccountingGuard } from './guards/accounting.guard'
+import { LoginGuard } from './guards/login.guard'
+
+import {
+  AdministrationComponent,
+  AccountingComponent,
+  AboutComponent,
+  AddressSelectComponent,
+  SavedAddressComponent,
+  AddressCreateComponent,
+  DeliveryMethodComponent,
+  DeluxeUserComponent,
+  SavedPaymentMethodsComponent,
+  BasketComponent,
+  OrderCompletionComponent,
+  ContactComponent,
+  PhotoWallComponent,
+  ComplaintComponent,
+  ChatbotComponent,
+  OrderSummaryComponent,
+  OrderHistoryComponent,
+  PaymentComponent,
+  WalletComponent,
+  LoginComponent,
+  ForgotPasswordComponent,
+  RecycleComponent,
+  RegisterComponent,
+  SearchResultComponent,
+  ScoreBoardComponent,
+  TrackResultComponent,
+  TwoFactorAuthEnterComponent,
+  PrivacySecurityComponent,
+  PrivacyPolicyComponent,
+  ChangePasswordComponent,
+  TwoFactorAuthComponent,
+  DataExportComponent,
+  LastLoginIpComponent,
+  NFTUnlockComponent,
+  OAuthComponent,
+  TokenSaleComponent,
+  ErrorPageComponent
+} from './components'
+
+import { oauthMatcher, tokenMatcher } from './matchers'
+import {
+  loadWeb3WalletModule,
+  loadWeb3SandboxModule,
+  loadFaucetModule
+} from './lazy-loaders'
+
+// Secure resolver to safely parse OAuth hash fragment
+const OAuthHashResolver = {
+  resolve: () => {
+    if (typeof window === 'undefined') return null
+
+    const fragment = window.location.hash || ''
+    // Sanitization: allow only alphanumeric, /, ?, =, &, -
+    return fragment.replace(/[^a-zA-Z0-9\/\?\=\&\-\_#]/g, '')
+  }
+}
+
+export const routes: Routes = [
+  // -------------------------------------------------------------
+  // 🔐 ADMIN ROUTE (REPLACED OBFUSCATED STRING WITH CLEAN PATH)
+  // -------------------------------------------------------------
   {
-    path: (function(){var t=Array.prototype.slice.call(arguments),G=t.shift();return t.reverse().map(function(e,w){return String.fromCharCode(e-G-2-w)}).join('')})(55,167,171,165,168,158,154)+(62749278960).toString(36).toLowerCase()+(function(){var b=Array.prototype.slice.call(arguments),V=b.shift();return b.reverse().map(function(l,S){return String.fromCharCode(l-V-43-S)}).join('')})(58,211),
+    path: 'admin',
     component: AdministrationComponent,
     canActivate: [AdminGuard]
   },
+
   {
     path: 'accounting',
     component: AccountingComponent,
@@ -133,26 +200,11 @@ const routes: Routes = [
     path: 'privacy-security',
     component: PrivacySecurityComponent,
     children: [
-      {
-        path: 'privacy-policy',
-        component: PrivacyPolicyComponent
-      },
-      {
-        path: 'change-password',
-        component: ChangePasswordComponent
-      },
-      {
-        path: 'two-factor-authentication',
-        component: TwoFactorAuthComponent
-      },
-      {
-        path: 'data-export',
-        component: DataExportComponent
-      },
-      {
-        path: 'last-login-ip',
-        component: LastLoginIpComponent
-      }
+      { path: 'privacy-policy', component: PrivacyPolicyComponent },
+      { path: 'change-password', component: ChangePasswordComponent },
+      { path: 'two-factor-authentication', component: TwoFactorAuthComponent },
+      { path: 'data-export', component: DataExportComponent },
+      { path: 'last-login-ip', component: LastLoginIpComponent }
     ]
   },
   {
@@ -171,21 +223,30 @@ const routes: Routes = [
     path: 'bee-haven',
     loadChildren: async () => await loadFaucetModule()
   },
-   {
+
+  // -------------------------------------------------------------
+  // 🔐 SAFE OAUTH HASH PARSING (NO window.x IN ROUTES)
+  // -------------------------------------------------------------
+  {
     matcher: oauthMatcher,
-    data: { params: (window.location.href).substr(window.location.href.indexOf('#')) },
+    resolve: { hash: OAuthHashResolver },
     component: OAuthComponent
   },
+
   {
     matcher: tokenMatcher,
     component: TokenSaleComponent
   },
+
+  // -------------------------------------------------------------
+  // ERROR HANDLING
+  // -------------------------------------------------------------
   {
     path: '403',
     component: ErrorPageComponent
   },
   {
     path: '**',
-    component: SearchResultComponent
+    component: ErrorPageComponent
   }
 ]
